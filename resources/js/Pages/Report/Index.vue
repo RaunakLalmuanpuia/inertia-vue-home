@@ -54,6 +54,7 @@
                                         class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-600 focus:border-blue-500 focus:outline-none focus:ring"
                                     />
                                 </div>
+
                                 <div>
                                     <label
                                         class="block text-sm font-medium text-white"
@@ -107,6 +108,23 @@
                                             </p>
                                         </div>
                                     </div>
+                                </div>
+                                <div>
+                                    <select v-model="selectedEmployer">
+                                        <option value="" disabled>
+                                            Select an Employer
+                                        </option>
+                                        <option
+                                            v-for="employer in employer"
+                                            :value="employer"
+                                        >
+                                            {{ employer.name }}
+                                        </option>
+                                    </select>
+                                    <p>
+                                        Selected Employer :
+                                        {{ selectedEmployer.id }}
+                                    </p>
                                 </div>
                                 <div class="flex justify-end mt-6">
                                     <button
@@ -338,6 +356,36 @@
                                 <Pagination :data="reports" />
                             </div>
                         </div>
+                        <!-- v-if="
+                                reports.data.employee_id ===
+                                $page.props.auth.user.id
+                            " -->
+
+                        <!-- Can delete -->
+                        <div>
+                            <!-- <p>
+                                {{
+                                    $page.props.reports.data.employee_id ===
+                                    $page.props.auth.user.id
+                                }}:::aas
+                            </p>
+                            <p>{{ $page.props.auth.user.id }}</p> -->
+                            <div
+                                v-for="report in reports.data"
+                                :key="reports.id"
+                            >
+                                <p>{{ report.employee_id }}</p>
+                                <p>{{ $page.props.auth.user.id }}</p>
+                                <p>
+                                    {{
+                                        report.employee_id ===
+                                        $page.props.auth.user.id
+                                    }}
+                                </p>
+                            </div>
+                            v-if=" $page.props.reports.data .employee_id ===
+                            $page.props.auth.user.id "
+                        </div>
                     </div>
 
                     <!-- Employer -->
@@ -415,21 +463,11 @@
                                                 <p
                                                     class="font-semibold text-gray-900"
                                                 >
-                                                    <a
-                                                        :href="
-                                                            route(
-                                                                'report.index'
-                                                            )
-                                                        "
-                                                    >
-                                                        <span
-                                                            class="absolute inset-0"
-                                                        />
-                                                        Employee Name:
-                                                        {{
-                                                            report.employee_name
-                                                        }}
-                                                    </a>
+                                                    <span
+                                                        class="absolute inset-0"
+                                                    />
+                                                    Employee Name:
+                                                    {{ report.employee_name }}
                                                 </p>
                                             </div>
                                         </div>
@@ -764,11 +802,13 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import Pagination from "@/Components/Pagination.vue";
 
 const isOpen = ref(false);
 const selectedReport = ref(null);
+
+const selectedEmployer = ref("");
 
 const openModal = (report) => {
     selectedReport.value = report;
@@ -783,6 +823,7 @@ const props = defineProps({
     reports: Object,
     pendingFiles: Object,
     verifiedFiles: Object,
+    employer: Object,
 });
 
 const onFileChange = (event) => {
@@ -792,6 +833,7 @@ const onFileChange = (event) => {
 const form = useForm({
     file: "",
     filename: "",
+    employer_id: "",
 });
 
 const adminform = useForm({
@@ -800,6 +842,7 @@ const adminform = useForm({
 });
 
 const submit = () => {
+    form.employer_id = selectedEmployer.value.id;
     form.post(route("report.store"));
 };
 

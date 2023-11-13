@@ -6,6 +6,7 @@ use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Report;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use App\Notifications\ReportVerified;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,12 +23,7 @@ class ReportController extends Controller
             ->leftJoin('users as employees', 'employees.id', '=', 'reports.employee_id')
             ->select('reports.*', 'employers.name as employer_name', 'employees.name as employee_name')
             ->paginate(5);
-        // ->get(); 
 
-
-
-        // $reports = Report::join('users', 'users.id', '=','reports.employer_id')->get(['reports.*', 'users.name']);
-        // dd($reports);
         $pendingFiles =  Report::leftJoin('users as employers', 'employers.id', '=', 'reports.employer_id')
             ->leftJoin('users as employees', 'employees.id', '=', 'reports.employee_id')
             ->select('reports.*', 'employers.name as employer_name', 'employees.name as employee_name')
@@ -37,12 +33,17 @@ class ReportController extends Controller
             ->leftJoin('users as employees', 'employees.id', '=', 'reports.employee_id')
             ->select('reports.*', 'employers.name as employer_name', 'employees.name as employee_name')
             ->whereIn('status', ['accepted', 'rejected'])->get();
-        // $report = Report::with(['users'])->get();
+
         // dd($verifiedFiles);
+        //All user with role employer to pass as props
+        $employer = Role::where('name', 'employer')->first()->users;
+
+        // dd($employer);
         return Inertia::render('Report/Index', [
             'reports' => $reports,
             'pendingFiles' => $pendingFiles,
             'verifiedFiles' => $verifiedFiles,
+            'employer' => $employer,
         ]);
     }
 
@@ -62,6 +63,7 @@ class ReportController extends Controller
         $request->validate([
             'file' => 'required|file',
             'filename' => 'required|string',
+            'employer_id' => 'required',
         ]);
         $file = $request->file('file');
         $filepath = $file->store('public/reports');
@@ -70,19 +72,32 @@ class ReportController extends Controller
             'employee_id' => auth()->user()->id,
             'file_path' => $filepath,
             'name' => $request->filename,
-            'status' => 'pending'
+            'status' => 'pending',
+            'employer_id' => $request->employer_id,
         ]);
 
-        $employers  = User::role('employer')->get();
-        // dd($employer);
-        // $employer->notify(
-        //     new ReportVerified($fileRecord)
-        // );
-        // Notify each employer individually
-        foreach ($employers as $employer) {
-            $employer->notify(new ReportVerified($fileRecord));
-        } 
+        //send the notification to the selected employer
+        $employeeId = $request->employer_id;
+        $employer  = User::where('id', $employeeId)->first();
         $fileRecord->save();
+        // dd($employer);
+        $employer->notify(
+            new ReportVerified($fileRecord)
+        );
+
+        // Notify each employer individually
+
+
+        // Notify the choosen employer 
+
+
+
+        // foreach ($employers as $employer) {
+        //     $employer->notify(new ReportVerified($fileRecord));
+        // }
+
+
+
         return redirect()->route('report.index')->with('message', 'Report Submitted Successfully!');
     }
 
