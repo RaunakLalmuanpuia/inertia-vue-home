@@ -22,7 +22,7 @@ class BookController extends Controller
         // Or if you prefer using the role name directly:
 
         // $usersWithRole = User::role('employee')->get();
-
+        // dd($usersWithRole);
         $book = Book::with(['author', 'genre'])->get();
         // $author = Author::all();
         // $genre = Genre::all();

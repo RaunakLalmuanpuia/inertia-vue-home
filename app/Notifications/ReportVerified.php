@@ -52,10 +52,11 @@ class ReportVerified extends Notification
             'report_id' => $this->report->id,
             'employee_id' => $this->report->employee_id,
             'employer_id' => $this->report->employer_id,
-            'employer_name' => $this->report->employer->name,
+            'employer_name' => $this->report->employer->name ?? null,
             'status' => $this->report->status,
             'feedback' => $this->report->feedback,
-            'filename' => $this->report->name
+            'filename' => $this->report->name,
+            'employee_name' => $this->report->employee->name
         ];
     }
 }

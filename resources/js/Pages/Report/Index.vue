@@ -484,6 +484,7 @@
                                             :href="
                                                 route('report.show', file.id)
                                             "
+                                            target="_blank"
                                             class="text-blue-500 border hover:underline border-slate-300"
                                             >{{ file.name }}</a
                                         >
@@ -560,6 +561,7 @@
                                             :href="
                                                 route('report.show', file.id)
                                             "
+                                            target="_blank"
                                             class="text-blue-500 border hover:underline border-slate-300"
                                             >{{ file.name }}</a
                                         >

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Report;
-use App\Notifications\ReportVerified;
 use Illuminate\Http\Request;
+use App\Notifications\ReportVerified;
 use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
@@ -72,6 +73,15 @@ class ReportController extends Controller
             'status' => 'pending'
         ]);
 
+        $employers  = User::role('employer')->get();
+        // dd($employer);
+        // $employer->notify(
+        //     new ReportVerified($fileRecord)
+        // );
+        // Notify each employer individually
+        foreach ($employers as $employer) {
+            $employer->notify(new ReportVerified($fileRecord));
+        } 
         $fileRecord->save();
         return redirect()->route('report.index')->with('message', 'Report Submitted Successfully!');
     }
